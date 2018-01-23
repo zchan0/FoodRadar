@@ -15,7 +15,8 @@ const config = {
     devtool: 'source-map',
     devServer: {
         contentBase: './dist',
-        hot: true
+        hot: true,
+        stats: 'minimal'
     },
     module: {
         rules: [
@@ -28,7 +29,7 @@ const config = {
                 test: /\.css$/,
                 use: [
                     'style-loader',
-                    'css-loder'
+                    'css-loader'
                 ]
             }
         ]
