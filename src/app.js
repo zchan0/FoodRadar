@@ -1,13 +1,11 @@
 import './style.css'
+import {Map} from './map.js'
 
-let map;
+const mapDiv = document.getElementById('map');
+const defaultLoc = {lat: 39.8943011, lng: 116.3922383};
+const mapOptions = {
+    center: defaultLoc,
+    zoom: 17
+};
 
-function initMap() {
-    map = new google.maps.Map(document.getElementById('map'), {
-        center: {lat: -34.397, lng: 150.644},
-        zoom: 8
-    });
-}
-
-initMap();
-
+const map = new Map(mapDiv, mapOptions);
