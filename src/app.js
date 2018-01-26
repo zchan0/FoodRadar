@@ -1,11 +1,11 @@
 import './style.css'
 import {Map} from './map.js'
 
-const mapDiv = document.getElementById('map');
-const defaultLoc = {lat: 39.8943011, lng: 116.3922383};
-const mapOptions = {
-    center: defaultLoc,
-    zoom: 17
+const script = document.createElement('script');
+script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyAY2F8IG3pLRgMYLPmhlwmzmrA39aoDl_k';
+script.async = true;
+script.defer = true;
+script.onload = function() {
+    Map.main();
 };
-
-const map = new Map(mapDiv, mapOptions);
+document.body.appendChild(script);
