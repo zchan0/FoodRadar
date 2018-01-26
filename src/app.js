@@ -6,6 +6,6 @@ script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyAY2F8IG3pLRgMYLP
 script.async = true;
 script.defer = true;
 script.onload = function() {
-    Map.main();
+    new Map();
 };
 document.body.appendChild(script);

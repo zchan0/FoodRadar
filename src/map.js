@@ -1,28 +1,26 @@
 export class Map {
-    constructor(dom, options) {
-        this.map = new google.maps.Map(dom, options);
-        this.locateCurrentPosition();
-    }
-
-    static main() {
+    constructor() {
         const mapDiv = document.getElementById('map');
-        const defaultLoc = {lat: 39.8943011, lng: 116.3922383};
+        this.currentPos = {lat: 39.8943011, lng: 116.3922383};
         const mapOptions = {
-            center: defaultLoc,
+            center: this.currentPos,
             zoom: 17
         };
-        new Map(mapDiv, mapOptions);
+        this.map = new google.maps.Map(mapDiv, mapOptions);
+        this.locateCurrentPosition();
+        this.createMarker(this.currentPos);
     }
 
     locateCurrentPosition() {
         if (navigator.geolocation) {
             const self = this;
             navigator.geolocation.getCurrentPosition(function(position) {
-                const pos = {
+                self.currentPos = {
                     lat: position.coords.latitude,
                     lng: position.coords.longitude
                 };
-                self.map.setCenter(pos);
+                self.map.setCenter(self.currentPos);
+                self.createMarker(self.currentPos);
             }, function() {
                 console.log('Error: The Geolocation service failed.');
             });
@@ -30,5 +28,12 @@ export class Map {
             // Browser doesn't support Geolocation
             console.log('Error: Your browser doesn\'t support Geolocation.');
         }
+    }
+
+    createMarker(position) {
+        return new google.maps.Marker({
+            position: position,
+            map: this.map
+        });
     }
 }
