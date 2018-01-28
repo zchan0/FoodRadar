@@ -7,21 +7,19 @@ export class Map {
             zoom: 17
         };
         this.map = new google.maps.Map(mapDiv, mapOptions);
-        this.locateCurrentPosition();
-        this.createMarker(this.currentPos);
     }
 
     locateCurrentPosition() {
         if (navigator.geolocation) {
             const self = this;
-            navigator.geolocation.getCurrentPosition(function(position) {
+            navigator.geolocation.getCurrentPosition(position => {
                 self.currentPos = {
                     lat: position.coords.latitude,
                     lng: position.coords.longitude
                 };
                 self.map.setCenter(self.currentPos);
                 self.createMarker(self.currentPos);
-            }, function() {
+            }, () => {
                 console.log('Error: The Geolocation service failed.');
             });
         } else {
@@ -31,9 +29,10 @@ export class Map {
     }
 
     createMarker(position) {
-        return new google.maps.Marker({
+        const options = {
             position: position,
             map: this.map
-        });
+        };
+        return new google.maps.Marker(options);
     }
 }
