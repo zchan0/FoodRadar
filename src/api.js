@@ -1,38 +1,70 @@
-const FSConfig = require('./config');
+import {FS_CONFIG} from './config'
 
-/**
- * Returns a list of recommended venues near the current location.
- * https://developer.foursquare.com/docs/api/venues/explore
- *
- * @param {any} currentPos {lat: x, lng: x}
- * @param {String} section One of food, drinks, coffee, shops, arts, outdoors, sights, trending, nextVenues, or topPicks
- * @returns Promise.response
- */
-function getVenueRecommendations(currentPos, section) {
-    const query = {
-        client_id: FSConfig.CLIENT_ID,
-        client_secret: FSConfig.CLIENT_SECRET,
-        ll: currentPos['lat'] + ',' + currentPos['lng'],
-        section: section,
-        v: getToday()
-    };
-    const init = { method: 'GET' };
-    const url = FSConfig.BASE_URL + 'venues/explore' + serialize(query);
-
-    return fetch(url, init)
-        .then(response => {
-            if (response.ok) {
-                return response.json();
-            } else {
-                throw new Error(`failed to fetch ${url}`);
-            }
-        })
-        .then(data => {
-            return data.response;
-        })
-        .catch(err => {
-            console.log(err);
+export class Foursquare {
+    constructor() {
+        this.query = {
+            client_id: FS_CONFIG.CLIENT_ID,
+            client_secret: FS_CONFIG.CLIENT_SECRET,
+            v: getToday()
+        }
+    }
+    /**
+     * Returns a list of recommended venues near the current location.
+     * https://developer.foursquare.com/docs/api/venues/explore
+     *
+     * @param {any} options config query parameters
+     * @returns Promise.response, contains an array of recommend venues.
+     */
+    getVenueRecommendations(options) {
+        this.query['limit'] = 50;
+        Object.keys(options).map(key => {
+            this.query[key] = options[key];
         });
+
+        const init = { method: 'GET' };
+        const url = FS_CONFIG.BASE_URL + 'venues/explore' + serialize(this.query);
+
+        return fetch(url, init)
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error(`failed to fetch ${url}`);
+                }
+            })
+            .then(data => {
+                return data.response.groups[0].items;
+            })
+            .then(recommendations => {
+                return recommendations.reduce((venues, recommendation) => {
+                    venues.push(recommendation.venue);
+                    return venues;
+                }, []);
+            })
+            .catch(err => {
+                console.log(err);
+            });
+    }
+
+    getVenuePhotos(venueId) {
+        const url = FS_CONFIG.BASE_URL + 'venues/' + venueId + '/photos' + serialize(this.query);
+        const init = { method : 'GET' };
+
+        return fetch(url, init)
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error(`failed to fetch ${url}`);
+                }
+            })
+            .then(data => {
+                return data.response.photos.items;
+            })
+            .catch(err => {
+                console.log(err);
+            });
+    }
 }
 
 /**
