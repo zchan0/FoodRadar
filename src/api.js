@@ -107,6 +107,11 @@ export class GoogleMap {
         service.nearbySearch(request, callback);
     }
 
+    calculateDistance(request, callback) {
+        const service = new google.maps.DistanceMatrixService();
+        service.getDistanceMatrix(request, callback);
+    }
+
     latlngToString(latlng) {
         return latlng['lat'] + ',' + latlng['lng'];
     }
