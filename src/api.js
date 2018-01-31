@@ -16,7 +16,7 @@ export class Foursquare {
      * @returns Promise.response, contains an array of recommend venues.
      */
     getVenueRecommendations(options) {
-        this.query['limit'] = 50;
+        this.query['limit'] = 25;
         Object.keys(options).map(key => {
             this.query[key] = options[key];
         });
@@ -64,6 +64,51 @@ export class Foursquare {
             .catch(err => {
                 console.log(err);
             });
+    }
+}
+
+export class GoogleMap {
+    constructor() {
+        const mapDiv = document.getElementById('map');
+        this.currentPos = {lat: 39.8943011, lng: 116.3922383};
+        const mapOptions = {
+            center: this.currentPos,
+            zoom: 17
+        };
+        this.map = new google.maps.Map(mapDiv, mapOptions);
+    }
+
+    locateCurrentPosition() {
+        if (navigator.geolocation) {
+            const self = this;
+            navigator.geolocation.getCurrentPosition(position => {
+                self.currentPos = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                };
+                self.map.setCenter(self.currentPos);
+                self.createMarker(self.currentPos);
+            }, () => {
+                console.log('Error: The Geolocation service failed.');
+            });
+        } else {
+            // Browser doesn't support Geolocation
+            console.log('Error: Your browser doesn\'t support Geolocation.');
+        }
+    }
+
+    nearbySearch(radius, callback) {
+        const request = {
+            location: this.currentPos,
+            radius: radius,
+            types: ['restaurant']
+        };
+        const service = new google.maps.places.PlacesService(this.map);
+        service.nearbySearch(request, callback);
+    }
+
+    latlngToString(latlng) {
+        return latlng['lat'] + ',' + latlng['lng'];
     }
 }
 
