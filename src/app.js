@@ -1,5 +1,6 @@
-import './style.css'
+import ko from 'knockout'
 import {GoogleMap, Foursquare} from './api'
+import './style.css'
 
 let map;
 
