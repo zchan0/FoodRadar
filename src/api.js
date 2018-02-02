@@ -2,29 +2,20 @@ import {FS_CONFIG} from './config'
 
 export class Foursquare {
     constructor() {
-        this.query = {
+        this.queryObj = {
             client_id: FS_CONFIG.CLIENT_ID,
             client_secret: FS_CONFIG.CLIENT_SECRET,
             v: getToday()
         }
     }
-    /**
-     * Returns a list of recommended venues near the current location.
-     * https://developer.foursquare.com/docs/api/venues/explore
-     *
-     * @param {any} options config query parameters
-     * @returns Promise.response, contains an array of recommend venues.
-     */
-    getVenueRecommendations(options) {
-        this.query['limit'] = 25;
-        Object.keys(options).map(key => {
-            this.query[key] = options[key];
-        });
 
-        const init = { method: 'GET' };
-        const url = FS_CONFIG.BASE_URL + 'venues/explore' + serialize(this.query);
+    searchForVenue(position) {
+        this.queryObj['ll'] = position;
+        this.queryObj['limit'] = 1;
+        const query = new URLSearchParams(this.queryObj);
+        const url = FS_CONFIG.BASE_URL + 'venues/search?' + query.toString();
 
-        return fetch(url, init)
+        return fetch(url)
             .then(response => {
                 if (response.ok) {
                     return response.json();
@@ -33,13 +24,7 @@ export class Foursquare {
                 }
             })
             .then(data => {
-                return data.response.groups[0].items;
-            })
-            .then(recommendations => {
-                return recommendations.reduce((venues, recommendation) => {
-                    venues.push(recommendation.venue);
-                    return venues;
-                }, []);
+                return data.response.venues[0];
             })
             .catch(err => {
                 console.log(err);
@@ -81,13 +66,3 @@ function getToday() {
 
     return '' + yy + mm + dd;
 }
-
-function serialize(obj) {
-    return '?' + Object.keys(obj).reduce((res, key) => {
-        const val = obj[key];
-        res.push((val !== null && typeof val === 'object') ?
-            serialize(val) :
-            encodeURIComponent(key) + '=' + encodeURIComponent(val));
-        return res;
-    }, []).join('&');
-};

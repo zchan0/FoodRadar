@@ -45,9 +45,8 @@ function processNearby(places) {
             // 4. insert distance&duration fileds to places
             insertDistDuration(places, results);
             const filteredPlaces = searchWithinTime(places, 15 * 60);
-             // 5. show filtered restaurants' names, get the details via Foursquare
-             // ko should observe filteredPlaces
-             console.log(filteredPlaces);
+            // 5. show filtered restaurants' names, get the details via Yelp
+            console.log(filteredPlaces);
         } else {
             console.log('Error: getDistanceMatrix with' + status);
         }
