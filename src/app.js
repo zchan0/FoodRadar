@@ -1,5 +1,6 @@
 import ko from 'knockout'
-import {GoogleMap, Foursquare} from './api'
+import {GoogleMap} from './model'
+import {Foursquare} from './api'
 import './style.css'
 
 let map;
@@ -10,6 +11,7 @@ script.async = true;
 script.defer = true;
 script.onload = () => {
     map = new GoogleMap();
+    map.setCenter(new google.maps.LatLng(34.6796693,-82.8371351));
     main();
 };
 document.body.appendChild(script);
