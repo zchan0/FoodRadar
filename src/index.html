@@ -7,6 +7,21 @@
     <title><%= htmlWebpackPlugin.options.title %></title>
 </head>
 <body>
-    <div id="map"></div>
+    <div class="container">
+        <div id="list">
+            <ul data-bind="foreach: restaurants">
+                <li>
+                    <h3 data-bind="text: name" class="name"></h3>
+                    <p>
+                        <span data-bind="text: rating"></span> ·
+                        <span data-bind="text: duration"></span> ·
+                        <span data-bind="text: openNowStr"></span>
+                    </p>
+                    <p data-bind="text: address"></p>
+                </li>
+            </ul>
+        </div>
+        <div id="map"></div>
+    </div>
 </body>
 </html>

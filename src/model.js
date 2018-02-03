@@ -1,7 +1,9 @@
+import ko from 'knockout'
+
 export class GoogleMap {
-    constructor() {
-        const mapDiv = document.getElementById('map');
-        this.map = new google.maps.Map(mapDiv, {zoom: 17});
+    constructor(div) {
+        this.map = new google.maps.Map(div, {zoom: 17});
+        this.markers = [];
     }
 
     /**
@@ -13,11 +15,11 @@ export class GoogleMap {
     setCenter(location) {
         this.currentLoc = location;
         this.map.setCenter(location);
-        new google.maps.Marker({
+        this.markers.push(new google.maps.Marker({
             map: this.map,
             title: 'Current Location',
             position: location
-        });
+        }));
     }
     /**
      * callback: (position)=>{}
@@ -46,7 +48,7 @@ export class GoogleMap {
      */
     nearbySearch(radius, callback) {
         const request = {
-            location: this.currentPos,
+            location: this.currentLoc,
             radius: radius,
             types: ['restaurant']
         };
@@ -66,7 +68,7 @@ export class GoogleMap {
             title: place.name,
             position: place.geometry.location
         };
-        new google.maps.Marker(options);
+        this.markers.push(new google.maps.Marker(options));
     }
 
     /**
@@ -81,6 +83,17 @@ export class GoogleMap {
         const service = new google.maps.DistanceMatrixService();
         service.getDistanceMatrix(request, callback);
     }
+
+    // This function will loop through the markers array and display them all.
+    fitBoundsToMarkers() {
+        const bounds = new google.maps.LatLngBounds();
+        // Extend the boundaries of the map for each marker and display the marker
+        for (let i = 0; i < this.markers.length; i++) {
+          this.markers[i].setMap(this.map);
+          bounds.extend(this.markers[i].position);
+        }
+        this.map.fitBounds(bounds);
+    }
 }
 
 export class Restaurant {
@@ -88,9 +101,22 @@ export class Restaurant {
         this.id = obj.id;
         this.placeId = obj.place_id;
         this.name = obj.name;
-        this.rating = obj.rating;   // The place's rating, from 0.0 to 5.0, based on aggregated user reviews.
         this.openNow = obj.opening_hours.open_now;
-        this.geometry = obj.geometry;
+        this.location = obj.geometry.location;
+
+        const self = this;
+        this.openNowStr = ko.computed(() => {
+            return self.openNow ? 'Open Now' : 'Closed'
+        });
+        this.rating = ko.computed(() => {
+            return 'Rating: ' + obj.rating;
+        });
+        this.duration = ko.computed(() => {
+            return ' Walk ' + obj.duration.text;
+        })
+        this.address = ko.computed(() => {
+            return 'Address: ' + obj.vicinity;
+        });
     }
 }
 

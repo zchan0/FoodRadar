@@ -4,6 +4,19 @@ html, body {
     padding: 0;
 }
 
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    height: 100%;
+}
+
+#list {
+    width: 38%;
+}
+
+/*  to show google map,
+    must always set a height on the <div> explicitly */
 #map {
+    width: 62%;
     height: 100%;
 }
