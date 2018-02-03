@@ -8,7 +8,13 @@ export class Foursquare {
             v: getToday()
         }
     }
-
+    /**
+     * API: https://developer.foursquare.com/docs/api/venues/search
+     *
+     * @param {String} position lat,lng
+     * @returns Promise, the restaurant at position, may have no value
+     * @memberof Foursquare
+     */
     searchForVenue(position) {
         this.queryObj['ll'] = position;
         this.queryObj['limit'] = 1;
@@ -31,6 +37,13 @@ export class Foursquare {
             });
     }
 
+    /**
+     * get Photo of a venue
+     *
+     * @param {string} venueId
+     * @returns Photo
+     * @memberof Foursquare
+     */
     getVenuePhotos(venueId) {
         const url = FS_CONFIG.BASE_URL + 'venues/' + venueId + '/photos' + serialize(this.query);
         const init = { method : 'GET' };

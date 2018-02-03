@@ -1,5 +1,3 @@
-import ko from 'knockout'
-
 export class GoogleMap {
     constructor() {
         const mapDiv = document.getElementById('map');
@@ -7,18 +5,18 @@ export class GoogleMap {
     }
 
     /**
-     * place type: google.maps.LatLng
+     * location: google.maps.LatLng
      *
-     * @param {any} place
+     * @param {Object} location
      * @memberof GoogleMap
      */
-    setCenter(place) {
-        this.currentPos = place;
-        this.map.setCenter(place);
+    setCenter(location) {
+        this.currentLoc = location;
+        this.map.setCenter(location);
         new google.maps.Marker({
             map: this.map,
-            title: 'Current Locatio',
-            position: place
+            title: 'Current Location',
+            position: location
         });
     }
     /**
