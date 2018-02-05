@@ -1,5 +1,3 @@
-import ko from 'knockout'
-
 export class GoogleMap {
     constructor(div) {
         this.map = new google.maps.Map(div, {zoom: 17});
@@ -15,11 +13,11 @@ export class GoogleMap {
     setCenter(location) {
         this.currentLoc = location;
         this.map.setCenter(location);
-        this.markers.push(new google.maps.Marker({
+        new google.maps.Marker({
             map: this.map,
             title: 'Current Location',
             position: location
-        }));
+        });
     }
     /**
      * callback: (position)=>{}
@@ -64,11 +62,10 @@ export class GoogleMap {
      */
     createMarker(place) {
         const options = {
-            map: this.map,
             title: place.name,
             position: place.geometry.location
         };
-        this.markers.push(new google.maps.Marker(options));
+        return new google.maps.Marker(options);
     }
 
     /**
@@ -85,38 +82,14 @@ export class GoogleMap {
     }
 
     // This function will loop through the markers array and display them all.
-    fitBoundsToMarkers() {
+    fitBoundsToMarkers(markers) {
         const bounds = new google.maps.LatLngBounds();
         // Extend the boundaries of the map for each marker and display the marker
-        for (let i = 0; i < this.markers.length; i++) {
-          this.markers[i].setMap(this.map);
-          bounds.extend(this.markers[i].position);
+        for (let i = 0; i < markers.length; i++) {
+          markers[i].setMap(this.map);
+          bounds.extend(markers[i].position);
         }
         this.map.fitBounds(bounds);
-    }
-}
-
-export class Restaurant {
-    constructor(obj) {
-        this.id = obj.id;
-        this.placeId = obj.place_id;
-        this.name = obj.name;
-        this.openNow = obj.opening_hours.open_now;
-        this.location = obj.geometry.location;
-
-        const self = this;
-        this.openNowStr = ko.computed(() => {
-            return self.openNow ? 'Open Now' : 'Closed'
-        });
-        this.rating = ko.computed(() => {
-            return 'Rating: ' + obj.rating;
-        });
-        this.duration = ko.computed(() => {
-            return ' Walk ' + obj.duration.text;
-        })
-        this.address = ko.computed(() => {
-            return 'Address: ' + obj.vicinity;
-        });
     }
 }
 

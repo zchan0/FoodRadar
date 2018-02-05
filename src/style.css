@@ -10,8 +10,20 @@ html, body {
     height: 100%;
 }
 
+.filter {
+    display: flex;
+    width: 100%;
+    height: 20px;
+    padding: 15px;
+}
+
+#filter-result {
+    margin-left: 10px;
+}
+
 #list {
     width: 38%;
+    height: 100%;
 }
 
 /*  to show google map,
