@@ -63,9 +63,17 @@ export class GoogleMap {
     createMarker(place) {
         const options = {
             title: place.name,
+            animation: google.maps.Animation.DROP,
             position: place.geometry.location
         };
         return new google.maps.Marker(options);
+    }
+
+    showMarkers(markers) {
+        const self = this;
+        markers.forEach(marker => {
+            marker.setMap(self.map);
+        });
     }
 
     /**

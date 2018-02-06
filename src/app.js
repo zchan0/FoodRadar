@@ -25,11 +25,37 @@ const ViewModel = function() {
             });
         }
     });
+    self.filteredPlaces.subscribe(() => {
+        if (self.ratingFilter() !== undefined) {
+            self.hideMarkers();
+            const markers = self.filteredPlaces().reduce((acc, key) => {
+                acc.push(self.allMarkers[key.place_id]);
+                return acc;
+            }, []);
+            map.showMarkers(markers);
+            map.fitBoundsToMarkers(markers);
+        }
+    })
+
+    self.allMarkers = {};
+    self.hideMarkers = () => {
+        for (let prop in self.allMarkers) {
+            self.allMarkers[prop].setMap(null);
+        }
+    };
 
     self.loadPlaces = (places) => {
+        let marker;
         places.forEach(place => {
             self.allPlaces.push(place);
+            marker = new google.maps.Marker({
+                title: place.name,
+                position: place.geometry.location
+            });
+            marker.setMap(map.map);
+            self.allMarkers[place.place_id] = marker;
         });
+        map.fitBoundsToMarkers(Object.values(self.allMarkers));
     };
 }
 
