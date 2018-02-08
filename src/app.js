@@ -45,18 +45,59 @@ const ViewModel = function() {
     };
 
     self.loadPlaces = (places) => {
-        let marker;
         places.forEach(place => {
             self.allPlaces.push(place);
-            marker = new google.maps.Marker({
-                title: place.name,
-                position: place.geometry.location
-            });
-            marker.setMap(map.map);
-            self.allMarkers[place.place_id] = marker;
+            self.createMarker(place);
         });
         map.fitBoundsToMarkers(Object.values(self.allMarkers));
     };
+
+    self.createMarker = (place => {
+        const foursquare = new Foursquare();
+        const marker = new google.maps.Marker({
+            title: place.name,
+            position: place.geometry.location
+        });
+        marker.addListener('click', () => {
+            foursquare.searchForVenue(place.name, place.geometry.location.toUrlValue())
+            .then(venue => {
+                // Sometimes cannot find the place in Foursquare with location
+                // details about localeCompare: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/localeCompare
+                const cmpOptions = {usage: 'search', ignorePunctuation: true};
+                if (place.name.localeCompare(venue.name, 'co', cmpOptions) === 0) {
+                    self.showInfoWindow(marker, venue);
+                } else {
+                    map.getPlaceDetails(place.place_id, (place, status) => {
+                        if (status == google.maps.places.PlacesServiceStatus.OK) {
+                            self.showInfoWindow(marker, place);
+                        }
+                    });
+                }
+            });
+        });
+        marker.setMap(map.map);
+        self.allMarkers[place.place_id] = marker;
+    });
+
+    self.showInfoWindow = ((marker, place) => {
+        // only one info window
+        if (!self.infoWindow) {
+            self.infoWindow = new google.maps.InfoWindow();
+        }
+        // close before open a new one
+        self.infoWindow.close();
+
+        let contentString = '<div class = "mapInfo">';
+        contentString += '<h3>' + place.name + '</h3>';
+        contentString += '</div>';
+
+        self.infoWindow.marker = marker;
+        self.infoWindow.setContent(contentString);
+        self.infoWindow.open(map.map, marker);
+        self.infoWindow.addListener('click', () => {
+            self.infoWindow.setMarker = null;
+        })
+    });
 }
 
 function main() {

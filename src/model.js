@@ -54,6 +54,12 @@ export class GoogleMap {
         service.nearbySearch(request, callback);
     }
 
+    getPlaceDetails(placeId, callback) {
+        const request = {placeId: placeId};
+        const service = new google.maps.places.PlacesService(this.map);
+        service.getDetails(request, callback);
+    }
+
     /**
      * place type: google.maps.PlaceResult
      *
@@ -71,9 +77,12 @@ export class GoogleMap {
 
     showMarkers(markers) {
         const self = this;
-        markers.forEach(marker => {
-            marker.setMap(self.map);
-        });
+        for (let i = 0; i < markers.length; i++) {
+            const marker = markers[i];
+            setTimeout(() => {
+                marker.setMap(self.map);
+            }, i * 200);
+        }
     }
 
     /**

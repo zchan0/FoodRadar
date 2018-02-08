@@ -15,7 +15,8 @@ export class Foursquare {
      * @returns Promise, the restaurant at position, may have no value
      * @memberof Foursquare
      */
-    searchForVenue(position) {
+    searchForVenue(name, position) {
+        this.queryObj['query'] = name;
         this.queryObj['ll'] = position;
         this.queryObj['limit'] = 1;
         const query = new URLSearchParams(this.queryObj);
