@@ -1,5 +1,5 @@
 import ko from 'knockout'
-import {GoogleMap} from './model'
+import {GoogleMap, Photo} from './model'
 import {Foursquare} from './api'
 import './style.css'
 
@@ -38,14 +38,24 @@ const ViewModel = function() {
     })
 
     self.allMarkers = {};
-    self.hideMarkers = () => {
-        for (let prop in self.allMarkers) {
-            self.allMarkers[prop].setMap(null);
-        }
-    };
+    self.allVenues = {};
 
     self.loadPlaces = (places) => {
+        const foursquare = new Foursquare();
+        const cmpOptions = {
+            usage: 'search',
+            ignorePunctuation: true
+        };
         places.forEach(place => {
+            foursquare.searchForVenue(place.name, place.geometry.location.toUrlValue())
+            .then(venue => {
+                // may cannot find corresponding venue of place
+                if (place.name.localeCompare(venue.name, 'co', cmpOptions) === 0) {
+                    foursquare.getVenueDetails(venue.id).then(venueDetails => {
+                        self.allVenues[place.place_id] = venueDetails;
+                    });
+                }
+            });
             self.allPlaces.push(place);
             self.createMarker(place);
         });
@@ -53,43 +63,101 @@ const ViewModel = function() {
     };
 
     self.createMarker = (place => {
-        const foursquare = new Foursquare();
         const marker = new google.maps.Marker({
             title: place.name,
             position: place.geometry.location
         });
-        marker.addListener('click', () => {
-            foursquare.searchForVenue(place.name, place.geometry.location.toUrlValue())
-            .then(venue => {
-                // Sometimes cannot find the place in Foursquare with location
-                // details about localeCompare: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/localeCompare
-                const cmpOptions = {usage: 'search', ignorePunctuation: true};
-                if (place.name.localeCompare(venue.name, 'co', cmpOptions) === 0) {
-                    self.showInfoWindow(marker, venue);
-                } else {
-                    map.getPlaceDetails(place.place_id, (place, status) => {
-                        if (status == google.maps.places.PlacesServiceStatus.OK) {
-                            self.showInfoWindow(marker, place);
-                        }
-                    });
-                }
-            });
+
+        let placeDetail = place;
+        marker.addListener('mouseover', () => {
+            const venue = self.allVenues[place.place_id];
+            if (venue) {
+                placeDetail['tips'] = venue.tips;
+                placeDetail['stats'] = venue.stats;
+                placeDetail['category'] = venue.categories[0].name;
+                placeDetail['bestPhoto'] = venue.bestPhoto;
+                placeDetail['opening_hours'] = venue.opening_hours;
+            }
+            self.showInfoWindow(marker, placeDetail);
         });
+
+        // marker.addListener('mouseout', self.hideInfoWindow);
         marker.setMap(map.map);
         self.allMarkers[place.place_id] = marker;
     });
 
-    self.showInfoWindow = ((marker, place) => {
+    self.hideMarkers = () => {
+        for (let prop in self.allMarkers) {
+            self.allMarkers[prop].setMap(null);
+        }
+    };
+
+    self.toggleMarkerBounce = (place) => {
+        const marker = self.allMarkers[place.place_id];
+        marker.setAnimation(google.maps.Animation.BOUNCE);
+        setTimeout(() => {
+            marker.setAnimation(null)
+        }, 700);
+    };
+
+    self.showInfoWindow = ((marker, placeDetail) => {
         // only one info window
         if (!self.infoWindow) {
             self.infoWindow = new google.maps.InfoWindow();
         }
         // close before open a new one
-        self.infoWindow.close();
+        self.hideInfoWindow();
 
-        let contentString = '<div class = "mapInfo">';
-        contentString += '<h3>' + place.name + '</h3>';
-        contentString += '</div>';
+        let contentString = '<div class="place-story">';
+
+        contentString += '<div class="info">';
+        contentString += '<h3 class="title">' + marker.title + '</h3>';
+
+        if (placeDetail.tips && placeDetail.tips.count > 0) {
+            contentString += '<div class="tip">';
+
+            const tips = placeDetail.tips.groups[0].items;
+            // pick the tip most people agreed
+            tips.sort((a, b) => {
+                return b.agreeCount - a.agreeCount;
+            });
+            const tip = tips[0];
+            contentString += '<span class="tip">\"' + tip.text + '"</span>';
+
+            contentString += '<hr>';
+            contentString += '</div>'; // end of tip div
+        }
+
+        contentString += '<div class="price-category-rating">';
+        contentString += '<span class="rating"> Ratings: ' + placeDetail.rating + '</span>';
+        if (placeDetail.category) {
+            contentString += '<span class="category"> · ' + placeDetail.category + '</span>';
+        }
+        contentString += '<span class="priceLevel"> · ' + map.priceLevelText(placeDetail.price_level) + '</span>';
+        if (placeDetail.opening_hours) {
+            const openNow = placeDetail.opening_hours.openNow;
+            if (!openNow)
+                contentString += '<span class="openNow"> · Closed now';
+        }
+        contentString += '</div>'; // end of price-category-rating div
+
+        contentString += '<div class="directions">';
+        if (placeDetail.stats) {
+            const visitsCount = placeDetail.stats.visitsCount;
+            contentString += '<span class="visitsCount">' + visitsCount + ' people visited here' + ' · </span>';
+        }
+        contentString += '<span class="duration">' + ' Walk ' + placeDetail.duration.text + '</span>';
+        contentString += '</div>'; // end of directions div
+        contentString += '</div>'; // end of info div
+
+        if (placeDetail.bestPhoto) {
+            contentString += '<div class="image">';
+            const photo = new Photo(placeDetail.bestPhoto);
+            contentString += '<img class=\'image\' src=' + photo.photoUrl + ' alt="image"">';
+            contentString += '</div>'; // end of image div
+        }
+
+        contentString += '</div>'; // end of place-story div
 
         self.infoWindow.marker = marker;
         self.infoWindow.setContent(contentString);
@@ -98,6 +166,12 @@ const ViewModel = function() {
             self.infoWindow.setMarker = null;
         })
     });
+
+    self.hideInfoWindow = () => {
+        if (self.infoWindow) {
+            self.infoWindow.close();
+        }
+    };
 }
 
 function main() {

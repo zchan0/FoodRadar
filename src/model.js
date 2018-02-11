@@ -54,12 +54,6 @@ export class GoogleMap {
         service.nearbySearch(request, callback);
     }
 
-    getPlaceDetails(placeId, callback) {
-        const request = {placeId: placeId};
-        const service = new google.maps.places.PlacesService(this.map);
-        service.getDetails(request, callback);
-    }
-
     /**
      * place type: google.maps.PlaceResult
      *
@@ -107,6 +101,14 @@ export class GoogleMap {
           bounds.extend(markers[i].position);
         }
         this.map.fitBounds(bounds);
+    }
+
+    priceLevelText(priceLevel) {
+        let text = '';
+        for (let i = 0; i < priceLevel; ++i) {
+            text += '$';
+        }
+        return text;
     }
 }
 

@@ -38,6 +38,27 @@ export class Foursquare {
             });
     }
 
+    getVenueDetails(venueId) {
+        const query = new URLSearchParams(this.queryObj);
+        const url = FS_CONFIG.BASE_URL + 'venues/' + venueId + '?' + query.toString();
+        const init = { method : 'GET' };
+
+        return fetch(url, init)
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error(`failed to fetch ${url}`);
+                }
+            })
+            .then(data => {
+                return data.response.venue;
+            })
+            .catch(err => {
+                console.log(err);
+            });
+    }
+
     /**
      * get Photo of a venue
      *

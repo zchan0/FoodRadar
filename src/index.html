@@ -16,7 +16,7 @@
         </div>
         <div id="list">
             <ul data-bind="foreach: filteredPlaces">
-                <li><h3 data-bind="text: name" class="name"></h3></li>
+                <li><h3 data-bind="text: name, event: {mouseover: $root.toggleMarkerBounce}" class="name"></h3></li>
             </ul>
         </div>
         <div id="map"></div>
