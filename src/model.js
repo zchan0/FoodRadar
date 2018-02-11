@@ -13,11 +13,6 @@ export class GoogleMap {
     setCenter(location) {
         this.currentLoc = location;
         this.map.setCenter(location);
-        new google.maps.Marker({
-            map: this.map,
-            title: 'Current Location',
-            position: location
-        });
     }
     /**
      * callback: (position)=>{}
@@ -52,6 +47,17 @@ export class GoogleMap {
         };
         const service = new google.maps.places.PlacesService(this.map);
         service.nearbySearch(request, callback);
+    }
+
+    geocodeLatLng(latlng, callback) {
+        const geocoder = new google.maps.Geocoder;
+        geocoder.geocode({'location': latlng}, (results, status) => {
+          if (status === 'OK') {
+            callback(results);
+          } else {
+            console.log('Geocoder failed due to: ' + status);
+          }
+        });
     }
 
     /**

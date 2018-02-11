@@ -175,9 +175,15 @@ const ViewModel = function() {
 }
 
 function main() {
-    const mapDiv = document.getElementById('map');
-    map = new GoogleMap(mapDiv);
+    map = new GoogleMap(document.getElementById('map'));
     map.setCenter(new google.maps.LatLng(34.6796693,-82.8371351));
+
+    map.geocodeLatLng(map.currentLoc, (results) => {
+        if (!results[0]) return;
+        const addrComponents = results[0].address_components;
+        const locationText = 'Restaurants near ' + addrComponents[0].long_name + ', ' + addrComponents[1].long_name;
+        document.querySelector('.current-location').innerText = locationText;
+    });
 
     map.nearbySearch('3000', (results, status) => {
         if (status !== google.maps.places.PlacesServiceStatus.OK) {
