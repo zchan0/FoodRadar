@@ -63,10 +63,7 @@ const ViewModel = function() {
     };
 
     self.createMarker = (place => {
-        const marker = new google.maps.Marker({
-            title: place.name,
-            position: place.geometry.location
-        });
+        const marker = map.createMarker(place);
 
         let placeDetail = place;
         marker.addListener('mouseover', () => {
@@ -81,7 +78,7 @@ const ViewModel = function() {
             self.showInfoWindow(marker, placeDetail);
         });
 
-        // marker.addListener('mouseout', self.hideInfoWindow);
+        marker.addListener('mouseout', self.hideInfoWindow);
         marker.setMap(map.map);
         self.allMarkers[place.place_id] = marker;
     });
