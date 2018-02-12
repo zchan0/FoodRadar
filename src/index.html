@@ -9,17 +9,24 @@
 <body>
     <div class="container">
         <div class="header">
-            <h2 class="current-location">Unknown location</h1>
-        </div>
-        <div class="filter">
-            <select data-bind="options: ratingOptions, optionsText: 'text', optionsValue: 'value', value: ratingFilter, optionsCaption: 'Rating'"
-                    id="rating-filter">
-            </select>
-            <!-- <span id="filter-result" data-bind="text: filteredPlaces().length + ' results'"></span> -->
+            <h1>FOOD RADAR</h1>
+            <!-- <h1 class="current-location">Unknown location</h1> -->
         </div>
         <div id="list">
+            <div class="filter">
+                <select data-bind="options: ratingOptions, optionsText: 'text', optionsValue: 'value', value: ratingFilter, optionsCaption: 'Rating'"></select>
+            </div>
             <ul data-bind="foreach: filteredPlaces">
-                <li><h3 data-bind="text: name, event: {mouseover: $root.toggleMarkerBounce}" class="name"></h3></li>
+                <li class="item">
+                    <div class="index">
+                        <p data-bind="text: $index() + 1"></p>
+                    </div>
+                    <div class="name-duration-addr">
+                        <p data-bind="text: name, event: {mouseover: $root.toggleMarkerBounce}" class="name"></p>
+                        <p data-bind="text: 'Walk ' + duration.text" class="duration"></p>
+                        <p data-bind="text: vicinity" class="vicinity"></p>
+                    </div>
+                </li>
             </ul>
         </div>
         <div id="map"></div>

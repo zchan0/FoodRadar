@@ -106,52 +106,32 @@ const ViewModel = function() {
         self.hideInfoWindow();
 
         let contentString = '<div class="place-story">';
-
-        contentString += '<div class="info">';
-        contentString += '<h3 class="title">' + marker.title + '</h3>';
+        contentString += '<h2 class="title">' + marker.title + '</h2>';
 
         if (placeDetail.tips && placeDetail.tips.count > 0) {
             contentString += '<div class="tip">';
-
             const tips = placeDetail.tips.groups[0].items;
             // pick the tip most people agreed
             tips.sort((a, b) => {
                 return b.agreeCount - a.agreeCount;
             });
             const tip = tips[0];
-            contentString += '<span class="tip">\"' + tip.text + '"</span>';
+            const user = tip.user;
+            console.log(user);
+            contentString += '<p class="tip">\"' + tip.text + '"</p>';
+            contentString += '<div class="user">';
 
-            contentString += '<hr>';
+            contentString += '<div class="avatar">';
+            const photoUrl = user.photo.prefix + '90x90' + user.photo.suffix;
+            contentString += `<img src=${photoUrl} alt="avatar" class="avatar">`;
+            contentString += '</div>';  // end of avatar
+
+            contentString += '<div class="username">';
+            contentString += `<p>${user.firstName} ${user.lastName}</p>`;
+            contentString += '</div>'; // end of username
+
+            contentString += '</div>'; // end of user
             contentString += '</div>'; // end of tip div
-        }
-
-        contentString += '<div class="price-category-rating">';
-        contentString += '<span class="rating"> Ratings: ' + placeDetail.rating + '</span>';
-        if (placeDetail.category) {
-            contentString += '<span class="category"> · ' + placeDetail.category + '</span>';
-        }
-        contentString += '<span class="priceLevel"> · ' + map.priceLevelText(placeDetail.price_level) + '</span>';
-        if (placeDetail.opening_hours) {
-            const openNow = placeDetail.opening_hours.openNow;
-            if (!openNow)
-                contentString += '<span class="openNow"> · Closed now';
-        }
-        contentString += '</div>'; // end of price-category-rating div
-
-        contentString += '<div class="directions">';
-        if (placeDetail.stats) {
-            const visitsCount = placeDetail.stats.visitsCount;
-            contentString += '<span class="visitsCount">' + visitsCount + ' people visited here' + ' · </span>';
-        }
-        contentString += '<span class="duration">' + ' Walk ' + placeDetail.duration.text + '</span>';
-        contentString += '</div>'; // end of directions div
-        contentString += '</div>'; // end of info div
-
-        if (placeDetail.bestPhoto) {
-            contentString += '<div class="image">';
-            const photo = new Photo(placeDetail.bestPhoto);
-            contentString += '<img class=\'image\' src=' + photo.photoUrl + ' alt="image"">';
-            contentString += '</div>'; // end of image div
         }
 
         contentString += '</div>'; // end of place-story div
@@ -175,12 +155,12 @@ function main() {
     map = new GoogleMap(document.getElementById('map'));
     map.setCenter(new google.maps.LatLng(34.6796693,-82.8371351));
 
-    map.geocodeLatLng(map.currentLoc, (results) => {
-        if (!results[0]) return;
-        const addrComponents = results[0].address_components;
-        const locationText = 'Restaurants near ' + addrComponents[0].long_name + ', ' + addrComponents[1].long_name;
-        document.querySelector('.current-location').innerText = locationText;
-    });
+    // map.geocodeLatLng(map.currentLoc, (results) => {
+    //     if (!results[0]) return;
+    //     const addrComponents = results[0].address_components;
+    //     const locationText = 'Restaurants near ' + addrComponents[0].long_name + ', ' + addrComponents[1].long_name;
+    //     document.querySelector('.current-location').innerText = locationText;
+    // });
 
     map.nearbySearch('3000', (results, status) => {
         if (status !== google.maps.places.PlacesServiceStatus.OK) {
