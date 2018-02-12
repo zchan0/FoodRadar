@@ -41,7 +41,10 @@ const config = {
         ]
     },
     plugins: [
-        new CleanWebpackPlugin(['dist']),
+        new CleanWebpackPlugin(['dist'], {
+            dry: true,
+            watch: true
+        }),
         new HtmlWebpackPlugin({
             title: 'FOOD RADAR',
             template: './src/index.html'
