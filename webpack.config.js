@@ -31,13 +31,19 @@ const config = {
                     'style-loader',
                     'css-loader'
                 ]
+            },
+            {
+                test: /\.(png|jpg|gif)$/,
+                use: [
+                    'file-loader'
+                ]
             }
         ]
     },
     plugins: [
         new CleanWebpackPlugin(['dist']),
         new HtmlWebpackPlugin({
-            title: 'No Idea Where to Eat?',
+            title: 'FOOD RADAR',
             template: './src/index.html'
         }),
         new webpack.NamedModulesPlugin(),
