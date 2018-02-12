@@ -3,10 +3,17 @@ import {GoogleMap, Photo} from './model'
 import {Foursquare} from './api'
 import './style.css'
 
+Array.prototype.diff = function(other) {
+    return this.filter(function(item) {
+        return other.indexOf(item) < 0;
+    });
+};
+
 const ViewModel = function() {
     const self = this;
 
     self.ratingOptions = [
+        {value: 0, text: 'Rating'},
         {value: 1, text: '1.0 and up'},
         {value: 2, text: '2.0 and up'},
         {value: 3, text: '3.0 and up'},
@@ -27,9 +34,16 @@ const ViewModel = function() {
     });
     self.filteredPlaces.subscribe(() => {
         if (self.ratingFilter() !== undefined) {
-            self.hideMarkers();
-            const markers = self.filteredPlaces().reduce((acc, key) => {
-                acc.push(self.allMarkers[key.place_id]);
+            const hidePlaces = self.allPlaces().diff(self.filteredPlaces());
+            if (!hidePlaces.length) return;
+
+            let marker;
+            hidePlaces.forEach(place => {
+                marker = self.fetchMarker(place);
+                if (marker.getMap()) marker.setMap(null);
+            });
+            const markers = self.filteredPlaces().reduce((acc, place) => {
+                acc.push(self.fetchMarker(place));
                 return acc;
             }, []);
             map.showMarkers(markers);
@@ -62,62 +76,60 @@ const ViewModel = function() {
         map.fitBoundsToMarkers(Object.values(self.allMarkers));
     };
 
-    self.createMarker = (place => {
+    self.createMarker = (place) => {
         const marker = map.createMarker(place);
-
-        let placeDetail = place;
         marker.addListener('mouseover', () => {
-            const venue = self.allVenues[place.place_id];
-            if (venue) {
-                placeDetail['tips'] = venue.tips;
-                placeDetail['stats'] = venue.stats;
-                placeDetail['category'] = venue.categories[0].name;
-                placeDetail['bestPhoto'] = venue.bestPhoto;
-                placeDetail['opening_hours'] = venue.opening_hours;
-            }
-            self.showInfoWindow(marker, placeDetail);
+            self.showInfoWindow(place);
         });
-
-        marker.addListener('mouseout', self.hideInfoWindow);
+        // marker.addListener('mouseout', self.hideInfoWindow);
         marker.setMap(map.map);
         self.allMarkers[place.place_id] = marker;
-    });
+    };
 
-    self.hideMarkers = () => {
-        for (let prop in self.allMarkers) {
-            self.allMarkers[prop].setMap(null);
-        }
+    self.fetchMarker = (place) => {
+        return self.allMarkers[place.place_id];
     };
 
     self.toggleMarkerBounce = (place) => {
-        const marker = self.allMarkers[place.place_id];
+        const marker = self.fetchMarker(place);
         marker.setAnimation(google.maps.Animation.BOUNCE);
         setTimeout(() => {
             marker.setAnimation(null)
         }, 700);
     };
 
-    self.showInfoWindow = ((marker, placeDetail) => {
+    self.showInfoWindow = ((place) => {
+        const marker = self.fetchMarker(place);
         // only one info window
         if (!self.infoWindow) {
             self.infoWindow = new google.maps.InfoWindow();
         }
+        // no need to update infoWindow
+        if (self.infoWindow.marker == marker) {
+            // console.log('infoWindow has already shown up.');
+            return;
+        }
         // close before open a new one
         self.hideInfoWindow();
 
-        let contentString = '<div class="place-story">';
-        contentString += '<h2 class="title">' + marker.title + '</h2>';
+        const venue = self.allVenues[place.place_id];
+        if (venue) {
+            place['tips'] = venue.tips;
+        }
 
-        if (placeDetail.tips && placeDetail.tips.count > 0) {
+        let contentString = '<div class="place-story">';
+        contentString += '<h2 class="title">' + place.name + '</h2>';
+
+        if (place.tips && place.tips.count > 0) {
             contentString += '<div class="tip">';
-            const tips = placeDetail.tips.groups[0].items;
+            const tips = place.tips.groups[0].items;
             // pick the tip most people agreed
             tips.sort((a, b) => {
                 return b.agreeCount - a.agreeCount;
             });
             const tip = tips[0];
             const user = tip.user;
-            console.log(user);
+
             contentString += '<p class="tip">\"' + tip.text + '"</p>';
             contentString += '<div class="user">';
 

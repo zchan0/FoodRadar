@@ -340,7 +340,6 @@ export class GoogleMap {
         const options = {
             icon: this.defaultIcon,
             title: place.name,
-            animation: google.maps.Animation.DROP,
             position: place.geometry.location
         };
         return new google.maps.Marker(options);
@@ -364,9 +363,11 @@ export class GoogleMap {
         const self = this;
         for (let i = 0; i < markers.length; i++) {
             const marker = markers[i];
+            marker.setAnimation(google.maps.Animation.DROP);
+            if (marker.getMap()) continue;
             setTimeout(() => {
                 marker.setMap(self.map);
-            }, i * 200);
+            }, i * 700);
         }
     }
 
@@ -400,17 +401,5 @@ export class GoogleMap {
             text += '$';
         }
         return text;
-    }
-}
-
-export class Photo {
-    constructor(obj) {
-        this.createdAt = obj.createdAt;
-        this.width  = obj.width;
-        this.height = obj.height;
-        // assemble a photo URL: prefix + SIZE(width x height) + suffix
-        this.photoUrl = obj.prefix +
-                        obj.width + 'x' + obj.height +
-                        obj.suffix;
     }
 }
