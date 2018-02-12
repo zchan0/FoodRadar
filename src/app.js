@@ -232,6 +232,11 @@ function searchWithinTime(places, maxDuration) {
     }, []);
 }
 
+// callback function: listening for authentication errors
+function gm_authFailure() {
+    window.alert('Google map authentication fails.');
+}
+
 let map;
 const vm = new ViewModel();
 
