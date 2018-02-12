@@ -90,16 +90,12 @@ const ViewModel = function() {
         return self.allMarkers[place.place_id];
     };
 
-    self.toggleMarkerBounce = (place) => {
+    self.showInfoWindow = ((place) => {
         const marker = self.fetchMarker(place);
         marker.setAnimation(google.maps.Animation.BOUNCE);
         setTimeout(() => {
             marker.setAnimation(null)
         }, 700);
-    };
-
-    self.showInfoWindow = ((place) => {
-        const marker = self.fetchMarker(place);
         // only one info window
         if (!self.infoWindow) {
             self.infoWindow = new google.maps.InfoWindow();
